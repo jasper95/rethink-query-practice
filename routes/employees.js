@@ -50,9 +50,7 @@ function* get(req, res, next){
                                                   salary_id : r.row('left')('salary_id')
                                               })
                                               .eqJoin('salary_id', r.table('salary'), {index: 'id'})
-                                              .without({right: "id", left: "salary_id"})
-                                              .zip()
-                                              .run();
+                                              .without({right: "id", left: "salary_id"}).zip().run();
         res.send(result);
     }catch(err){
         return next(new errs.InternalServerError(err.message));
