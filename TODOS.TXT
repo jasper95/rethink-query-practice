@@ -1,0 +1,17 @@
+DB SCHEMA
+EMPLOYEE
+-id
+-salary_id
+-department_id
+-name
+
+DEPARTMENT
+-id
+-name
+
+SALARY
+-id
+-grade
+-amount
+
+-CREATE DB SCHEMA

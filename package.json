@@ -1,0 +1,17 @@
+{
+  "name": "employee",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "restify": "^5.0.1",
+    "restify-router": "^0.4.2",
+    "rethinkdbdash": "^2.3.29"
+  }
+}
