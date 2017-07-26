@@ -39,6 +39,7 @@ function* create(req, res, next) {
 }
 
 function* get(req, res, next){
+    // const {page, size} = req.body;
     try{
         const result = yield r.table('employee').eqJoin('department_id', r.table('department'), {index: 'id'})
                                               .map({
