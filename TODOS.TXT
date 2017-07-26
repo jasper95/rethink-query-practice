@@ -4,6 +4,8 @@ EMPLOYEE
 -salary_id
 -department_id
 -name
+-age
+-emp_num
 
 DEPARTMENT
 -id
@@ -14,4 +16,11 @@ SALARY
 -grade
 -amount
 
--CREATE DB SCHEMA
+-CREATE DB SCHEMA WITH INITIAL DATA --DONE
+-CREATE EMPLOYEE WITH VALIDATION using the fields below --DONE
+    -name
+    -age
+    -dep_name
+    -salary_grade
+-ADD VALIDATION USING RESTIFY BUILTIN ERROR RESPONSE -- DONE
+-DISPLAY ALL EMPLOYEES WITH EMP_NUM, NAME, DEPARTMENT, SALARGY_GRADE --DONE
