@@ -26,13 +26,14 @@ function* avgSalary(req, res, next){
                                             .group('name')
                                             .avg('amount')
                                             .default(null)
+                                            .ungroup()
+                                            .orderBy('reduction')
+                                            .map({
+                                              department: r.row('group'),
+                                              avg_salary: r.row('reduction')
+                                            })
                                             .run();
-    res.send(result.map(function(val){
-      return {
-        department: val.group,
-        avg_salary: val.reduction
-      }
-    }));
+    res.send(result);
   }catch(err){
     return next(new errs.InternalServerError(err.message));
   }

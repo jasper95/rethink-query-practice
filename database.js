@@ -3,14 +3,17 @@ const config = require('./config'),
       Promise = require('bluebird');
 
 module.exports.createDatabase = function(){
+  const dbName = config.rethinkdb.db;
   Promise.coroutine(function*(){
     try{
-      yield r.dbCreate(config.rethinkdb.db).run();
-      yield r.db(config.rethinkdb.db).tableCreate("employee").run();
-      yield r.db(config.rethinkdb.db).table("employee").indexCreate("salary_id").run();
-      yield r.db(config.rethinkdb.db).table("employee").indexCreate("department_id").run();
-      yield r.db(config.rethinkdb.db).tableCreate("department").run();
-      yield r.db(config.rethinkdb.db).table("department").insert([
+      yield r.dbCreate(dbName).run();
+      yield r.tableCreate("employee").run();
+      yield r.table("employee").indexCreate("full_name", [r.row("last_name"), r.row("first_name")]);
+      yield r.table("employee").indexCreate("salary_id").run();
+      yield r.table("employee").indexCreate("department_id").run();
+      yield r.table("employee").indexCreate("createdAt").run();
+      yield r.tableCreate("department").run();
+      yield r.table("department").insert([
          {
              dep_prefix: "01",
              name: "Developers",

@@ -9,6 +9,7 @@ const server = restify.createServer();
 
 server.pre(restify.plugins.pre.userAgentConnection());
 server.use(restify.plugins.bodyParser());
+server.use(restify.plugins.queryParser());
 salariesRoutes.applyRoutes(server);
 employeesRoutes.applyRoutes(server);
 departmentsRoutes.applyRoutes(server);
