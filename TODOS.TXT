@@ -10,6 +10,8 @@ EMPLOYEE
 DEPARTMENT
 -id
 -name
+-dep_prefix
+-curr_count
 
 SALARY
 -id

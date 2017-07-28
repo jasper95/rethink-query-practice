@@ -25,6 +25,7 @@ r.table("posts").concatMap(function(post) {
 ORDERBY
 Sort the sequence by document values of the given key(s). To specify the ordering, wrap the attribute with either r.asc or r.desc (defaults to ascending).
 Sorting without an index requires the server to hold the sequence in memory, and is limited to 100,000 documents (or the setting of the arrayLimit option for run). Sorting with an index can be done on arbitrarily large tables, or after a between command using the same index. This applies to both secondary indexes and the primary key (e.g., {index: 'id'}).
+arrayLimit = 100000
 
 SKIP
 Skip a number of elements from the head of the sequence.
@@ -51,6 +52,7 @@ If the sequence has less than the requested number of elements (i.e., calling sa
 GROUP
 Takes a stream and partitions it into multiple groups based on the fields or functions provided.
 Using a function, you can also group by date on a ReQL date field.
+arrayLimit = 100000
 
 UNGROUP
 If you want to operate on all the groups rather than operating on each group (e.g. if you want to order the groups by their reduction), you can use ungroup to turn a grouped stream or grouped data into an array of objects representing the groups.

@@ -31,8 +31,8 @@ module.exports.createDatabase = function(){
              curr_count: 1
          }
       ]).run();
-      yield r.db(config.rethinkdb.db).tableCreate("salary").run();
-      yield r.db(config.rethinkdb.db).table("salary").insert([
+      yield r.tableCreate("salary").run();
+      yield r.table("salary").insert([
           {
               salary_grade: "A",
               amount: 40000
