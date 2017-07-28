@@ -29,11 +29,13 @@ function* create(req, res, next) {
         emp_num: `${dep_prefix}-${emp_suffix}`,
         createdAt: r.now()
       }, {returnChanges: true}).run();
-      yield r.table("department").get(department.id)
-              .update({
-                curr_count: r.row("curr_count").add(1)
-              }).run();
-      res.send(result.changes[0].new_val);
+      if(result.inserted !== 0){
+        yield r.table("department").get(department.id)
+                .update({
+                  curr_count: r.row("curr_count").add(1)
+                }).run();
+        res.send(result.changes[0].new_val);
+      } else res.send(new errs.InternalServerError("INSERTING AN EMPLOYEE FAILED"));
   }catch(err){
     return next(new errs.InternalServerError(err.message));
   }

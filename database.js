@@ -3,8 +3,8 @@ const config = require('./config'),
       Promise = require('bluebird');
 
 module.exports.createDatabase = function(){
-  const dbName = config.rethinkdb.db;
-  Promise.coroutine(function*(){
+  return Promise.coroutine(function*(){
+    const dbName = config.rethinkdb.db;
     try{
       yield r.dbCreate(dbName).run();
       yield r.tableCreate("employee").run();
@@ -12,6 +12,7 @@ module.exports.createDatabase = function(){
       yield r.table("employee").indexCreate("salary_id").run();
       yield r.table("employee").indexCreate("department_id").run();
       yield r.table("employee").indexCreate("createdAt").run();
+      yield r.table('employee').indexWait().run();
       yield r.tableCreate("department").run();
       yield r.table("department").insert([
          {
@@ -49,8 +50,9 @@ module.exports.createDatabase = function(){
               amount: 15000
           }
       ]).run();
+      console.log("DATABASE READY");
     }catch (err) {
-
+      console.log("DATABASE ALREADY CREATED");
     }
   })();
 }

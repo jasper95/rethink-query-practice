@@ -15,7 +15,9 @@ employeesRoutes.applyRoutes(server);
 departmentsRoutes.applyRoutes(server);
 
 
-db.createDatabase();
-server.listen(config.port, function() {
-  console.log('%s listening at %s', server.name, server.url);
-});
+db.createDatabase()
+  .then(function(res){
+    server.listen(config.port, function() {
+      console.log('%s listening at %s', server.name, server.url);
+    });
+  });
