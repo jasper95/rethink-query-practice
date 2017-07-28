@@ -25,9 +25,8 @@ function* create(req, res, next){
       return next(new errs.UnprocessableEntityError("Invalid request parameters"));
     try{
         const dep_id = yield r.table('department').filter({dep_prefix: dep_prefix})('id').limit(1).nth(0).default(null).run();
-        if(dep_id){
+        if(dep_id)
           res.send(new errs.UnprocessableEntityError("Prefix already exists"));
-        }
         else {
           const result = yield r.table('department')
                                 .insert({
@@ -75,8 +74,8 @@ function* getEmployees(req, res, next){
                             }).run();
       res.send(result);
     }catch(err){
+        res.send(new errs.InternalServerError(err.message));
     }
-    res.send(new errs.InternalServerError(err.message));
     return next();
 }
 
@@ -91,7 +90,7 @@ function* remove(req, res, next){
                                         )
                                 }).run();
       if(!department)
-        res.send("DEPARTMENT DOES NOT EXISTS");
+        res.send(new errs.NotFoundError("DEPARTMENT DOES NOT EXISTS"));
       else if(department.deleted !== 0){
         const result  = yield r.table('employee').getAll(department.changes[0].old_val.id, {index: 'department_id'}).delete()
                                 .do(function(doc){

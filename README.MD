@@ -37,3 +37,7 @@ Functionalities:
   - accepts dep_prefix and name
 - delete a department '/department/:dep_prefix'DELETE
   - also deletes all employees in that department
+- Update salary '/salaries/:salary_grade'PATCH
+- Get an employee 'employee/:emp_num'GET
+- Update an employee 'employee/:emp_num'PATCH
+- Delete an employee 'employee/:emp_num'DELETE

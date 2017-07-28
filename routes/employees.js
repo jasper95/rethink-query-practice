@@ -6,6 +6,9 @@ const Router = require('restify-router').Router,
 
 router.post('/employees', Promise.coroutine(create));
 router.get('/employees', Promise.coroutine(get));
+router.get('/employees/:emp_num', Promise.coroutine(getEmployee));
+router.patch('/employees/:emp_num', Promise.coroutine(updateEmployee));
+router.del('/employees/:emp_num', Promise.coroutine(deleteEmployee))
 
 function* create(req, res, next) {
   const {age, salary_grade, dep_prefix, first_name, last_name} = req.body;
@@ -97,6 +100,88 @@ function* get(req, res, next){
         return next(new errs.InternalServerError(err.message));
     }
     return next();
+}
+
+function* getEmployee(req, res, next){
+  const {emp_num} = req.params;
+  try{
+    const result = yield r.table('employee')
+                          .getAll(emp_num, {index: 'emp_num'}).nth(0).default(null)
+                          .do(function(doc){
+                            return r.branch(doc.eq(null),
+                                    null,
+                                    doc.merge(
+                                        r.table('salary').get(doc('salary_id')).pluck('amount', 'salary_grade'),
+                                        r.table('department').get(doc('department_id')).pluck('name')
+                                    )
+                            )
+                          }).run();
+    if(!result)
+      res.send(new errs.NotFoundError('Employee does not exists'))
+    else{
+      res.send({
+        name: `${result.first_name} ${result.last_name}`,
+        department: result.name,
+        age : result.age,
+        salary: result.amount,
+        salary_grade: result.salary_grade,
+        createdAt: result.createdAt
+      });
+    }
+  }catch(err){
+    res.send(new errs.InternalServerError(err.message));
+  }
+  return next();
+}
+
+function* updateEmployee(req, res, next){
+  const {emp_num} = req.params;
+  const {first_name, last_name, age} = req.body;
+  if(!(first_name && last_name && age) || isNaN(age))
+    return next(new errs.UnprocessableEntityError("Invalid request parameters"));
+  try{
+    const result = yield r.table('employee')
+                          .getAll(emp_num, {index: 'emp_num'}).nth(0).default(null)
+                          .do(function(doc){
+                            return r.branch(doc.eq(null),
+                                            null,
+                                            r.table('employee').get(doc('id')).update({
+                                              first_name,
+                                              age: parseInt(age),
+                                              first_name
+                                            }, {returnChanges: true})
+                            )
+                          }).run();
+    if(!result){
+      res.send(new errs.NotFoundError("EMPLOYEE NUMBER does not exists"));
+    } else if(result.unchanged === 0) {
+      res.send(result.changes[0].new_val);
+    } else res.send("Employee not updated");
+  }catch(err){
+      res.send(new errs.InternalServerError(err.message))
+  }
+  return next();
+}
+
+function* deleteEmployee(req, res, next){
+  const {emp_num} = req.params;
+  try{
+    const result = yield r.table('employee').getAll(emp_num, {index: 'emp_num'}).nth(0).default(null)
+                              .do(function(doc){
+                                return r.branch(doc.eq(null),
+                                        null,
+                                        r.table('employee').get(doc('id')).delete({returnChanges: true})
+                                      )
+                              }).run();
+    if(!result)
+      res.send(new errs.NotFoundError("EMPLOYEE NUMBER does not exists"));
+    else if(result.deleted == 0)
+      res.send(new errs.InternalServerError("Failed to delete the employee"));
+    else res.send(`EMPLOYEE with EMPLOYEE NUMBER ${result.changes[0].old_val.emp_num} successfully deleted`)
+  }catch(err){
+    res.send(new errs.InternalServerError(err.message))
+  }
+  return next();
 }
 
 module.exports = router;

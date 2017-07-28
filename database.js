@@ -8,7 +8,8 @@ module.exports.createDatabase = function(){
     try{
       yield r.dbCreate(dbName).run();
       yield r.tableCreate("employee").run();
-      yield r.table("employee").indexCreate("full_name", [r.row("last_name"), r.row("first_name")]);
+      //yield r.table("employee").indexCreate("full_name", [r.row("last_name"), r.row("first_name")]);
+      yield r.table("employee").indexCreate("emp_num").run();
       yield r.table("employee").indexCreate("salary_id").run();
       yield r.table("employee").indexCreate("department_id").run();
       yield r.table("employee").indexCreate("createdAt").run();

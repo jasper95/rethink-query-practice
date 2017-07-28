@@ -6,6 +6,7 @@ const Router = require('restify-router').Router,
 
 
 router.get('/salaries', Promise.coroutine(get));
+router.patch('/salaries/:grade', Promise.coroutine(update));
 router.get('/salaries/avg', Promise.coroutine(avgSalary));
 
 function* get(req, res, next) {
@@ -38,6 +39,30 @@ function* avgSalary(req, res, next){
     return next(new errs.InternalServerError(err.message));
   }
   return next();
+}
+
+function* update(req, res, next){
+    const { amount } = req.body;
+    const { grade } = req.params;
+    if(!grade)
+      return next(new errs.BadRequestError("Invalid request body"));
+    try{
+      const result = yield r.table('salary').filter({salary_grade: grade}).limit(1).nth(0).default(null)
+                                .do(function(doc){
+                                  return r.branch(doc.eq(null),
+                                          null,
+                                          r.table('salary').get(doc('id')).update({amount}, {returnChanges: true})
+                                        )
+                                }).run();
+      if(!result){
+        res.send(new errs.NotFoundError("SALARY GRADE does not exists"));
+      } else if(result.unchanged == 0) {
+        res.send(result.changes[0].new_val);
+      } else res.send("Salary not updated")
+    }catch(err){
+      res.send(new errs.InternalServerError(err.message));
+    }
+    return next();
 }
 
 module.exports = router;

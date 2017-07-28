@@ -1,3 +1,27 @@
+GET
+Find one by pk
+
+GETALL
+Find by index (default index 'id')
+
+BETWEEN
+Find by index in range (default index pk)
+
+TABLE
+Get all documents in table
+
+INSERT
+ADD document(s)
+
+UPDATE
+Update document(s) matching the given keys in object
+
+REPLACE
+Replace the entire document(s) with the given object
+
+DELETE
+Delete document(s)
+
 SYNC
 sync ensures that writes on a given table are written to permanent storage. Queries that specify soft durability ({durability: 'soft'}) do not give such guarantees, so sync can be used to ensure the state of these queries. A call to sync does not return until all previous writes to the table are persisted.
 
