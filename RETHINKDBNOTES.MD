@@ -132,3 +132,81 @@ DO
 Call an anonymous function using return values from other ReQL commands or queries as arguments.
 The last argument to do (or, in some forms, the only argument) is an expression or an anonymous function which receives values from either the previous arguments or from prefixed commands chained before do. The do command is essentially a single-element map, letting you map a function over just one document. This allows you to bind a query result to a local variable within the scope of do, letting you compute the result just once and reuse it in a complex expression or in a series of ReQL commands.
 Arguments passed to the do function must be basic data types, and cannot be streams or selections. While the arguments will all be evaluated before the function is executed, they may be evaluated in any order, so their values should not be dependent on one another. The type of do’s result is the type of the value returned from the function or last expression.
+
+
+EQJOIN
+left_table.concatMap(function(left){
+		return right_table.getAll('left_table_key', {index: right_table_index})
+											.map(function(right){
+													return {left, right}
+											})
+})
+
+SETTINGS
+Write acknowledgements - are set per table with the write_acks setting, either using the config command or by writing to the table_config system table. The default is majority, meaning writes will be acknowledged when a majority of (voting) replicas have confirmed their writes. The other possible option is single, meaning writes will be acknowledged when a single replica acknowledges it.
+
+Durability - is set per table with the durability setting, again using either reconfigure or writing to the table_config system table. In hard durability mode, writes are committed to disk before acknowledgements are sent; in soft mode, writes are acknowledged immediately after being stored in memory. The soft mode is faster but slightly less resilient to failure. The default is hard.
+
+Read mode -  is set per query via an optional argument, read_mode (or readMode), to table. It has three possible values:
+single returns values that are in memory (but not necessarily written to disk) on the primary replica. This is the default.
+majority -  will only return values that are safely committed on disk on a majority of replicas. This requires sending a message to every replica on each read, so it is the slowest but most consistent.
+outdated - will return values that are in memory on an arbitrarily-selected replica. This is the fastest but least consistent.
+
+INDEXING
+You cannot chain multiple getAll commands. Use a compound index to efficiently retrieve documents by multiple fields.
+An orderBy command that uses a secondary index cannot be chained after getAll. You can only chain it after a table command. However, you can chain orderBy after a between command provided it uses the same index.
+
+SIMPLE
+Use simple indexes to efficiently retrieve and order documents by the value of a single field.
+An orderBy command that uses a secondary index cannot be chained after getAll. You can only chain it after a table command. However, you can chain orderBy after a between command provided it uses the same index.
+
+Creation
+r.table("users").indexCreate("last_name").run(conn, callback)
+
+QUERY
+r.table("users").getAll("Smith", {index: "last_name"}).run(conn, callback)
+
+COMPOUND INDEXES
+Compound indexes use arrays to efficiently retrieve documents by multiple fields.
+
+Creation
+r.table("users").indexCreate(
+    "full_name", [r.row("last_name"), r.row("first_name")]
+).run(conn, callback)
+
+QUERY
+r.table("users").getAll(["Smith", "John"], {index: "full_name"}).run(conn, callback)
+
+
+MULTI INDEXES
+With a multi index, a document can be indexed using more than one key in the same index. For instance, a blog post might have multiple tags, and each tag might refer to multiple blog posts.
+
+The keys in a multi index can be single values, compound values or even arbitrary expressions
+
+Creation
+r.table("posts").indexCreate("tags", {multi: true})
+
+QUERY
+r.table("posts").getAll("travel", {index: "tags"}).run(conn, callback)
+
+Arbitrary index Creation
+r.table("users").indexCreate("full_name2", function(user) {
+    return r.add(user("last_name"), "_", user("first_name"))
+}).run()
+
+r.table("users").indexCreate("activities", r.row("hobbies").add(r.row("sports")),
+    {multi: true}).run()
+
+Use a multi index and a mapping function to speed getAll/contains
+
+r.table("users").indexCreate("userEquipment", function(user) {
+    return user("equipment").map(function(equipment) {
+        return [ user("id"), equipment ];
+    });
+}, {multi: true}).run();
+
+// Query equivalent to:
+// r.table("users").getAll(1).filter(function (user) {
+//     return user("equipment").contains("tent");
+// });
+r.table("users").getAll([1, "tent"], {index: "userEquipment"}).distinct().run();
